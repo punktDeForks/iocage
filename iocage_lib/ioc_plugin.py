@@ -84,6 +84,26 @@ class IOCPlugin(object):
             # Backwards compat
             self.branch = 'master'
 
+    def clone_repo(self):
+        if self.server == "download.freebsd.org":
+            git_server = "https://github.com/freenas/iocage-ix-plugins.git"
+        else:
+            git_server = self.server
+
+        git_working_dir = f"{self.iocroot}/.plugin_index"
+
+        if os.geteuid() == 0:
+            try:
+                self.__clone_repo(git_server, git_working_dir)
+            except Exception as err:
+                iocage_lib.ioc_common.logit(
+                    {
+                        "level": "EXCEPTION",
+                        "message": err
+                    },
+                    _callback=self.callback
+                )
+
     def fetch_plugin(self, props, num, accept_license):
         """Helper to fetch plugins"""
         _json = f"{self.iocroot}/.plugin_index/{self.plugin}.json" if not \
@@ -674,35 +694,11 @@ fingerprint: {fingerprint}
             except FileNotFoundError:
                 pass
 
-    def fetch_plugin_index(self,
-                           props,
-                           _list=False,
-                           list_header=False,
-                           list_long=False,
-                           accept_license=False,
-                           icon=False,
-                           official=False,
-                           index_only=False):
-
-        if self.server == "download.freebsd.org":
-            git_server = "https://github.com/freenas/iocage-ix-plugins.git"
-        else:
-            git_server = self.server
-
-        git_working_dir = f"{self.iocroot}/.plugin_index"
-
-        # list --plugins won't often be root.
-
-        if os.geteuid() == 0:
-            try:
-                self.__clone_repo(git_server, git_working_dir)
-            except Exception as err:
-                iocage_lib.ioc_common.logit(
-                    {
-                        "level": "EXCEPTION",
-                        "message": err
-                    },
-                    _callback=self.callback)
+    def fetch_plugin_index(
+        self, props, _list=False, list_header=False, list_long=False,
+        accept_license=False, icon=False, official=False, index_only=False
+    ):
+        self.clone_repo()
 
         with open(f"{self.iocroot}/.plugin_index/INDEX", "r") as plugins:
             plugins = json.load(plugins)
