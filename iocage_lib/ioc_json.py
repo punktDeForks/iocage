@@ -700,7 +700,7 @@ class IOCConfiguration(IOCZFS):
     @staticmethod
     def get_version():
         """Sets the iocage configuration version."""
-        version = '23'
+        version = '24'
 
         return version
 
@@ -1071,6 +1071,12 @@ class IOCConfiguration(IOCZFS):
         if not conf.get('nat_forwards'):
             conf['nat_forwards'] = 'none'
 
+        # Version 24 keys
+        # Migrate defaultrouter and defaultrouter6 default 'none' to 'auto'
+        for option in ('defaultrouter', 'defaultrouter6'):
+            if conf.get(option) == 'none':
+                conf[option] = 'auto'
+
         if not default:
             conf.update(jail_conf)
 
@@ -1265,8 +1271,8 @@ class IOCConfiguration(IOCZFS):
             'ip6_addr': 'none',
             'ip6_saddrsel': '1',
             'ip6': 'new',
-            'defaultrouter': 'none',
-            'defaultrouter6': 'none',
+            'defaultrouter': 'auto',
+            'defaultrouter6': 'auto',
             'resolver': '/etc/resolv.conf',
             'mac_prefix': self.mac_prefix,
             'vnet0_mac': 'none',
