@@ -322,9 +322,6 @@ class IOCStop(object):
         # will be written on the next jail start/restart.
         jail_conf_file = Path(f"/var/run/jail.ioc-{self.uuid}.conf")
 
-        if jail_conf_file.is_file():
-            cmd.extend(['-f', str(jail_conf_file)])
-
         cmd.extend(['-r', f'ioc-{self.uuid}'])
 
         stop = su.Popen(
